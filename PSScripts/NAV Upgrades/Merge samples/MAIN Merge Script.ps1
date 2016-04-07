@@ -1,22 +1,24 @@
 ﻿#parameters
-$CurrentDirectory          = 'C:\_Merge\Distri82ToNAV2016CTP20'
-$OriginalFile              = Get-ChildItem 'C:\_Merge\Distri82ToNAV2016CTP20\NAV2016_CTP19_AllObjects.txt'
-$ModifiedFile              = Get-ChildItem 'C:\_Merge\Distri82ToNAV2016CTP20\Distri2016_CTP19_AllObjects.txt'
-$TargetFile                = Get-ChildItem 'C:\_Merge\Distri82ToNAV2016CTP20\NAV2016_CTP20_AllObjects.txt'
+$CurrentDirectory          = 'C:\_Merge\Comfort14ToNav2016Cu6'
+$OriginalFile              = Get-ChildItem 'C:\_Merge\Comfort14ToNav2016Cu6\NAV2015_CU2_AllObjects.txt'
+$ModifiedFile              = Get-ChildItem 'C:\_Merge\Comfort14ToNav2016Cu6\Cmfrt2015_14_CU2_AllObjects.txt'
+$TargetFile                = Get-ChildItem 'C:\_Merge\Comfort14ToNav2016Cu6\NAV2016_CU6_AllObjects.txt'
+$ResultFile                = Join-Path $CurrentDirectory 'Cmfrt2016_Result.txt'
 $MergeResultFolder         = Join-Path $CurrentDirectory 'Result'
 $LanguageFolder            = Join-Path $CurrentDirectory 'Languages'
 $FilteredMergeResultFolder = Join-Path $CurrentDirectory 'Result_Filtered'
-$VersionListPrefixes       = 'NAVW1', 'NAVBE', 'I'
+$VersionListPrefixes       = 'NAVW1', 'NAVBE', 'Cmfrt'
 $RemoveLanguageArr         = 'NLB','FRB'
 
 #enable/disable required functions:
 $SplitFiles                   = $false  #This may take a while (depending on the amount of objects)
 $CreateDeltas                 = $false
-$RemoveLanguages              = $false
-$MergeVersions                = $false
-$updateVersionList            = $false
-$updateDateTime               = $false
+$RemoveLanguages              = $true
+$MergeVersions                = $true
+$updateVersionList            = $true
+$updateDateTime               = $true
 $CreateFilteredResultFolder   = $true
+$CreateFullResultText         = $true
 $DisplayObjectFilters         = $false
 $OpenAraxisMergeWhenConflicts = $false
 
@@ -34,7 +36,7 @@ $MergeInfoFolder = "$MergeResultFolder\MergeInfo"
 #Script Execution
 Import-Module "${env:ProgramFiles(x86)}\Microsoft Dynamics NAV\90\RoleTailored Client\Microsoft.Dynamics.Nav.Model.Tools.psd1" -force
 import-module "${env:ProgramFiles}\Microsoft Dynamics NAV\90\Service\NavAdminTool.ps1” | Out-Null
-Get-ChildItem -path (Join-Path $PSScriptRoot '..\PSFunctions\*.ps1') -File -Recurse | foreach { . $_.FullName}
+Import-module "C:\PowerShell Tools\Cloud.Ready.Software.PowerShell\PSModules\LoadModules.ps1" | Out-Null
 
 cd $CurrentDirectory
 Clear-Host
@@ -114,7 +116,7 @@ if($MergeVersions){
 }if($updateVersionList -or $updateDateTime)  {    if (-not (Test-Path $MergeResultFolder)) {write-error "$MergeResultFolder not found! Updating Version List impossible"}    if (!$MergeResult) {$MergeResult = Import-Clixml -Path "$MergeInfoFolder\MergeResult.xml"}         $MergeResult |
             Where-Object {$_.MergeResult –eq 'Merged' -or $_.MergeResult –eq 'Conflict'}  |                Merge-NAVApplicationObjectProperty -UpdateDateTime $updateDateTime -UpdateVersionList $updateVersionList -VersionListPrefixes $VersionListPrefixes
 }
-if($CreateFilteredResultFolder){    write-host "Copying the non-identical files to $FilteredMergeResultFolder ..." -ForegroundColor Green    if (-not (Test-Path $MergeResultFolder)) {write-error "$MergeResultFolder not found! Deleting objects based on Mergeinfo is not possible"}    if (!$MergeResult) {$MergeResult = Import-Clixml -Path "$MergeInfoFolder\MergeResult.xml"}    Copy-NAVChangedMergedResultFiles -MergeResultObjects $MergeResult -DestinationFolder $FilteredMergeResultFolder}if($DisplayObjectFilters){    Write-Host 'Composing ObjectFilters...' -ForegroundColor Green    #if (-not (Test-Path $FilteredMergeResultFolder)) {write-error "$FilteredMergeResultFolder not found! Returning objectfilters will not be possible"}    if (!$MergeResult) {$MergeResult = Import-Clixml -Path "$MergeInfoFolder\MergeResult.xml"}    $AllObjects = $MergeResult | Where-Object MergeResult -ne 'Unchanged'    
+if($CreateFilteredResultFolder){    write-host "Copying the non-identical files to $FilteredMergeResultFolder ..." -ForegroundColor Green    if (-not (Test-Path $MergeResultFolder)) {write-error "$MergeResultFolder not found! Deleting objects based on Mergeinfo is not possible"}    if (!$MergeResult) {$MergeResult = Import-Clixml -Path "$MergeInfoFolder\MergeResult.xml"}    Copy-NAVChangedMergedResultFiles -MergeResultObjects $MergeResult -DestinationFolder $FilteredMergeResultFolder}if($CreateFullResultText){    Get-ChildItem (Join-Path $FilteredMergeResultFolder '\*.txt') |          Join-NAVApplicationObjectFile -Destination $ResultFile -confirm:$false -Force}if($DisplayObjectFilters){    Write-Host 'Composing ObjectFilters...' -ForegroundColor Green    #if (-not (Test-Path $FilteredMergeResultFolder)) {write-error "$FilteredMergeResultFolder not found! Returning objectfilters will not be possible"}    if (!$MergeResult) {$MergeResult = Import-Clixml -Path "$MergeInfoFolder\MergeResult.xml"}    $AllObjects = $MergeResult | Where-Object MergeResult -ne 'Unchanged'    
     if($AllObjects){
         for ($i = 1; $i -lt 8; $i++)
         {
