@@ -38,30 +38,30 @@ $file.Editor.Text = $Text
 $psISE.CurrentPowerShellTab.AddOnsMenu.Submenus.Add(''Copy History to new file'',$code,$null)
 
 
-$code =
+$loadNav2015CmdLetsCodeBlock =
 {
  Import-Module "${env:ProgramFiles(x86)}\Microsoft Dynamics NAV\80\RoleTailored Client\Microsoft.Dynamics.Nav.Model.Tools.psd1" -WarningAction SilentlyContinue | out-null
  Import-Module "$env:ProgramFiles\Microsoft Dynamics NAV\80\Service\NavAdminTool.ps1" -WarningAction SilentlyContinue | Out-Null
 }
-$psISE.CurrentPowerShellTab.AddOnsMenu.Submenus.Add(''Load NAV 2015 CmdLets'',$code,$null)
+$psISE.CurrentPowerShellTab.AddOnsMenu.Submenus.Add('Load NAV 2015 CmdLets',$loadNav2015CmdLetsCodeBlock,$null)
 
-$code =
+$loadNav2016CmdLetsCodeBlock =
 {
  Import-Module "${env:ProgramFiles(x86)}\Microsoft Dynamics NAV\90\RoleTailored Client\Microsoft.Dynamics.Nav.Model.Tools.psd1" -WarningAction SilentlyContinue | out-null
  Import-Module "$env:ProgramFiles\Microsoft Dynamics NAV\90\Service\NavAdminTool.ps1" -WarningAction SilentlyContinue | Out-Null
  Import-Module "${env:ProgramFiles(x86)}\Microsoft Dynamics NAV\90\RoleTailored Client\Microsoft.Dynamics.Nav.Apps.Tools.psd1" -WarningAction SilentlyContinue | Out-Null
 
  Clear-Host
- Write-Host ''get-Command -Module ''Microsoft.Dynamics.Nav.*'''' -ForeGroundColor Yellow
- get-Command -Module ''Microsoft.Dynamics.Nav.*''
+ Write-Host 'get-Command -Module 'Microsoft.Dynamics.Nav.*'' -ForeGroundColor Yellow
+ get-Command -Module 'Microsoft.Dynamics.Nav.*'
 }
-$psISE.CurrentPowerShellTab.AddOnsMenu.Submenus.Add(''Load NAV 2016 CmdLets'',$code,$null)
+$psISE.CurrentPowerShellTab.AddOnsMenu.Submenus.Add('Load NAV 2016 CmdLets',$loadNav2016CmdLetsCodeBlock,$null)
 
 $code =
 {
   Start-Steroids
 }
-$psISE.CurrentPowerShellTab.AddOnsMenu.Submenus.Add(''Start ISE Steroids'',$code,$null)
+$psISE.CurrentPowerShellTab.AddOnsMenu.Submenus.Add('Start ISE Steroids',$code,$null)
 
 $code =
 {
@@ -69,11 +69,11 @@ $code =
 }
 $psISE.CurrentPowerShellTab.AddOnsMenu.Submenus.Add(''Open CRS scripts folder'',$code,$null)
 
-$code =
+$loadCloudReadyCmdLetsCodeBlock =
 {
   Import-module (Join-Path ''' + $PSScriptRoot + ''' ''LoadModules.ps1'')  
 }
-$psISE.CurrentPowerShellTab.AddOnsMenu.Submenus.Add(''Force Import Cloud Ready Software Modules'',$code,$null)
+$psISE.CurrentPowerShellTab.AddOnsMenu.Submenus.Add(''Force Import Cloud Ready Software Modules'',$loadCloudReadyCmdLetsCodeBlock,$null)
 
 '
 
