@@ -44,9 +44,9 @@
     Invoke-SQL -DatabaseServer $TargetServerInstanceObject.DatabaseServer -DatabaseInstance $TargetServerInstanceObject.DatabaseInstance -DatabaseName $SandboxInstance -SQLCommand "ALTER ROLE [db_owner] ADD MEMBER [$CurrentUser]" -ErrorAction Continue
 
     #Drop ReVision Triggers
-    Invoke-SQL -DatabaseServer $TargetServerInstanceObject.DatabaseServer -DatabaseInstance $TargetServerInstanceObject.DatabaseInstance -DatabaseName $SandboxInstance -SQLCommand 'DISABLE TRIGGER [dbo].[REVISION_UPDATE] ON [dbo].[Object]' -ErrorAction Continue
-    Invoke-SQL -DatabaseServer $TargetServerInstanceObject.DatabaseServer -DatabaseInstance $TargetServerInstanceObject.DatabaseInstance -DatabaseName $SandboxInstance -SQLCommand 'DISABLE TRIGGER [dbo].[REVISION_INSERT] ON [dbo].[Object]' -ErrorAction Continue
-    Invoke-SQL -DatabaseServer $TargetServerInstanceObject.DatabaseServer -DatabaseInstance $TargetServerInstanceObject.DatabaseInstance -DatabaseName $SandboxInstance -SQLCommand 'DISABLE TRIGGER [dbo].[REVISION_DELETE] ON [dbo].[Object]' -ErrorAction Continue
+    #Invoke-SQL -DatabaseServer $TargetServerInstanceObject.DatabaseServer -DatabaseInstance $TargetServerInstanceObject.DatabaseInstance -DatabaseName $SandboxInstance -SQLCommand 'DISABLE TRIGGER [dbo].[REVISION_UPDATE] ON [dbo].[Object]' -ErrorAction Continue
+    #Invoke-SQL -DatabaseServer $TargetServerInstanceObject.DatabaseServer -DatabaseInstance $TargetServerInstanceObject.DatabaseInstance -DatabaseName $SandboxInstance -SQLCommand 'DISABLE TRIGGER [dbo].[REVISION_INSERT] ON [dbo].[Object]' -ErrorAction Continue
+    #Invoke-SQL -DatabaseServer $TargetServerInstanceObject.DatabaseServer -DatabaseInstance $TargetServerInstanceObject.DatabaseInstance -DatabaseName $SandboxInstance -SQLCommand 'DISABLE TRIGGER [dbo].[REVISION_DELETE] ON [dbo].[Object]' -ErrorAction Continue
 
 
     #Import NAV LIcense
@@ -68,11 +68,11 @@
         Write-host 'Import Fob for Unlicensed objects' -ForegroundColor Green
             $null = 
                 Import-NAVApplicationObject `
-                    -DatabaseServer $DatabaseServer `                    
+                    -DatabaseServer $DatabaseServer `
                     -DatabaseName $SandboxInstance `
                     -Path $FobFileForCreatingUnlicensedObjects `
                     -LogPath $LogImportFob `
-                    -NavServerName ([net.dns]::GetHostName()) `                    
+                    -NavServerName ([net.dns]::GetHostName()) `
                     -NavServerInstance $SandboxInstance `
                     -confirm:$false `
                     -ErrorAction continue `                    -SynchronizeSchemaChanges No `                    -ImportAction Overwrite

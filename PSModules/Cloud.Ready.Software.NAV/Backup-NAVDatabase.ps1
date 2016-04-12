@@ -31,7 +31,7 @@
         $RegKey  = $BaseReg.OpenSubKey("SOFTWARE\\Microsoft\\Microsoft SQL Server\\$SQLInstancename\\MSSQLServer")
         $Backuplocation = $RegKey.GetValue('BackupDirectory')
     
-        $BackupFile = "$ServerInstance.bak"
+        $BackupFile = "$($ServerInstanceObject.Databasename).bak"
         $BackupFileFullPath = Join-Path $Backuplocation $BackupFile
     
         $SQLString = "BACKUP DATABASE [$($ServerInstanceObject.Databasename)] TO  DISK = N'$BackupFileFullPath' WITH  COPY_ONLY, NOFORMAT, INIT,  NAME = N'NAVAPP_QA_MT-Full Database Backup', SKIP, NOREWIND, NOUNLOAD,  STATS = 10"
