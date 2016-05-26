@@ -9,6 +9,7 @@ $LanguageFolder            = Join-Path $CurrentDirectory 'Languages'
 $FilteredMergeResultFolder = Join-Path $CurrentDirectory 'Result_Filtered'
 $VersionListPrefixes       = 'NAVW1', 'NAVBE', 'Cmfrt'
 $RemoveLanguageArr         = 'NLB','FRB'
+$MergeServerInstance       = 'Cmfrt2016_Merge'
 
 #enable/disable required functions:
 $SplitFiles                   = $false  #This may take a while (depending on the amount of objects)
@@ -21,6 +22,9 @@ $CreateFilteredResultFolder   = $true
 $CreateFullResultText         = $true
 $DisplayObjectFilters         = $false
 $OpenAraxisMergeWhenConflicts = $false
+$ImportMergeResultIntoMergeDb = $true
+$ImportFilesSeparately        = $true
+$CompileDatabase              = $true
 
 #Constants
 $ScriptDirectory   = $PSScriptRoot
@@ -32,6 +36,8 @@ $DeltaFolderOriginalModified  = $CurrentDirectory  + '\Delta_' + $OriginalFile.B
 $DeltaFolderOriginalTarget    = $CurrentDirectory  + '\Delta_' + $OriginalFile.BaseName + 'vs' + $TargetFile.BaseName
 $DeltaFolderModifiedTarget    = $CurrentDirectory  + '\Delta_' + $ModifiedFile.BaseName + 'vs' + $TargetFile.BaseName
 $MergeInfoFolder = "$MergeResultFolder\MergeInfo"
+$ImportLogFolder = "$CurrentDirectory\ImportLog"
+$CompileLogFolder = "$CurrentDirectory\CompileLog"
 
 #Script Execution
 Import-Module "${env:ProgramFiles(x86)}\Microsoft Dynamics NAV\90\RoleTailored Client\Microsoft.Dynamics.Nav.Model.Tools.psd1" -force
@@ -134,4 +140,11 @@ if($MergeVersions){
     Move-Item -Path "$ModifiedFile.backup" -Destination $ModifiedFile -Force
     Move-Item -Path "$TargetFile.backup" -Destination $TargetFile  -Force
     
-}if($OpenAraxisMergeWhenConflicts){    Write-host 'Open Araxis to start solving conflicts' -ForegroundColor Green    $ConflictModifiedFolder = "$MergeResultFolder\ConflictModified"    $ConflictOriginalFolder = "$MergeResultFolder\ConflictOriginal"    $ConflictTargetFolder = "$MergeResultFolder\ConflictTarget"    $MergetoolCommand = """""$MergetoolPath"" ""$ConflictOriginalFolder"" ""$ConflictModifiedFolder"" ""$ConflictTargetFolder"""""    Write-host $MergetoolCommand    cmd /c $MergetoolCommand }
+}if($OpenAraxisMergeWhenConflicts){    Write-host 'Open Araxis to start solving conflicts' -ForegroundColor Green    $ConflictModifiedFolder = "$MergeResultFolder\ConflictModified"    $ConflictOriginalFolder = "$MergeResultFolder\ConflictOriginal"    $ConflictTargetFolder = "$MergeResultFolder\ConflictTarget"    $MergetoolCommand = """""$MergetoolPath"" ""$ConflictOriginalFolder"" ""$ConflictModifiedFolder"" ""$ConflictTargetFolder"""""    Write-host $MergetoolCommand    cmd /c $MergetoolCommand }if($ImportMergeResultIntoMergeDb){    if($ImportFilesSeparately) {        Import-NAVApplicationObjectFilesFromFolder `         -ServerInstance $MergeServerInstance `         -SourceFolder $FilteredMergeResultFolder `         -LogFolder $ImportLogFolder `         -ImportAction Overwrite `         -SynchronizeSchemaChanges No `         -ContinueOnError    } else {        $ServerInstanceObject = Get-NAVServerInstance4 -ServerInstance $MergeServerInstance        $databaseServer = $ServerInstanceObject.DatabaseServer + '\' + $ServerInstanceObject.DatabaseInstance        Import-NAVApplicationObject `            -Path $ResultFile `            -NavServerName ([net.dns]::GetHostName()) `            -NavServerInstance $MergeServerInstance `            -NavServerManagementPort $ServerInstanceObject.ManagementServicesPort `            -DatabaseName $ServerInstanceObject.DatabaseName `            -DatabaseServer $databaseServer    }}if($CompileDatabase){    if(Test-Path $CompileLogFolder) {Remove-Item -Path $CompileLogFolder -Recurse -Force}     New-Item -Path $CompileLogFolder -ItemType directory    $ServerInstanceObject = Get-NAVServerInstance4 -ServerInstance $MergeServerInstance    $databaseServer = $ServerInstanceObject.DatabaseServer + '\' + $ServerInstanceObject.DatabaseInstance    Compile-NAVApplicationObject `
+            -DatabaseServer $databaseServer `
+            -DatabaseName $ServerInstanceObject.DatabaseName `
+            -NavServerName ([net.dns]::GetHostName()) `
+            -NavServerInstance $MergeServerInstance `
+            -NavServerManagementPort $ServerInstanceObject.ManagementServicesPort `
+            -LogPath $CompileLogFolder `        
+            -SynchronizeSchemaChanges:Force}
