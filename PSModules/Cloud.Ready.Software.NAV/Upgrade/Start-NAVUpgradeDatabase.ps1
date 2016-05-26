@@ -8,6 +8,7 @@
     param(       
         [String] $Name,   
         [String] $DatabaseBackupFile,
+        [Parameter(Mandatory=$true)]
         [String] $ResultObjectFile,
         [String] $WorkingFolder,
         [String] $LicenseFile,
@@ -18,7 +19,7 @@
         [ValidateSet('Overwrite','Use')]
         [String] $IfResultDBExists='Overwrite',
         [Switch] $CreateBackup
-    )
+    )    
     
     #Creating Workspace
     $LogFolder = join-path $workingfolder 'Log_NAVUpgradeDatabase'
@@ -44,7 +45,7 @@
             Remove-NAVEnvironment -ServerInstance $SandboxServerInstanceObject.ServerInstance -ErrorAction Stop
             New-NAVEnvironment -ServerInstance $SandboxServerInstanceObject.ServerInstance -BackupFile $DatabaseBackupFile -EnablePortSharing -ErrorVariable $ErrorNewNAVEnvironment -ErrorAction SilentlyContinue
         } else {
-            Write-Warning "ServerInstance $SandboxServerInstanceObject.ServerInstance already exists.  This script is re-using it."
+            Write-Warning "ServerInstance $($SandboxServerInstanceObject.ServerInstance) already exists.  This script is re-using it."
         }
     } else {
         New-NAVEnvironment -ServerInstance $SandboxServerInstanceObject.ServerInstance -BackupFile $DatabaseBackupFile -EnablePortSharing -ErrorVariable $ErrorNewNAVEnvironment -ErrorAction SilentlyContinue
