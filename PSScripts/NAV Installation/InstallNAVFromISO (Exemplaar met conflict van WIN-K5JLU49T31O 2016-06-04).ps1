@@ -1,4 +1,4 @@
-﻿$name = 'NAV_9_45834_BE'
+﻿$name = 'NAV_9_46045_BE'
 $isofile = "C:\_Installs\$name.iso"
 $ConfigFile     = join-path $PSScriptRoot 'FullInstallNAV2016.xml'
 $Licensefile    = 'C:\_Installs\5230132_003 and 004 IFACTO_NAV2016_BELGIUM_2015 11 03.flf'
@@ -13,7 +13,6 @@ $InstallationResult =    Install-NAVFromISO `        -ISOFilePath $isofile ` 
 
 Import-Module "$($InstallationResult.TargetPath)\RoleTailored Client\Microsoft.Dynamics.Nav.Model.Tools.psd1"
 Import-Module "$($InstallationResult.TargetPathX64)\Service\NavAdminTool.ps1"
-. "$($InstallationResult.TargetPathX64)\Service\NavAdminTool.ps1"
 
 $CurrentServerInstance = Get-NAVServerInstance -ServerInstance $InstallationResult.ServerInstance
 
