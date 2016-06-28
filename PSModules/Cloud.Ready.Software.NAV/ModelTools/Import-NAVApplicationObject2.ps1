@@ -7,7 +7,8 @@
    
 #>
 function Import-NAVApplicationObject2 {
-    param (        
+    param (    
+        [CmdletBinding()]    
         [Parameter(Mandatory=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [Alias('Fullname')] 
@@ -29,7 +30,6 @@ function Import-NAVApplicationObject2 {
         [String] $NavServerName = ([net.dns]::GetHostName()),
         [Parameter(Mandatory=$false)]
         [Switch] $Confirm = $false
-
     )
     
     process{
@@ -42,7 +42,8 @@ function Import-NAVApplicationObject2 {
 
         Import-NAVApplicationObject ` `            -Path $Path `
             -DatabaseName $ServerInstanceObject.DatabaseName `            -DatabaseServer $DatabaseServer `            -LogPath $LogPath `
-            -ImportAction $ImportAction `            -SynchronizeSchemaChanges $SynchronizeSchemaChanges `            -NavServerInstance $ServerInstanceObject.ServerInstance `            -NavServerName $NavServerName `            -NavServerManagementPort $ServerInstanceObject.ManagementServicesPort `            -Confirm:$Confirm           
+            -ImportAction $ImportAction `            -SynchronizeSchemaChanges $SynchronizeSchemaChanges `            -NavServerInstance $ServerInstanceObject.ServerInstance `            -NavServerName $NavServerName `            -NavServerManagementPort $ServerInstanceObject.ManagementServicesPort `            -Confirm:$Confirm `
+            -ErrorAction $PSCmdlet.MyInvocation.BoundParameters["ErrorAction"]            
         
     }
 }

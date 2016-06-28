@@ -17,15 +17,15 @@ function Get-NAVServerInstance4
      {
          $ServerInstance | Get-NAVServerInstance | ForEach-Object -Process `
          {
-         $ServerConfig = New-Object PSObject
-         foreach ($Attribute in $_.Attributes)
-         {
-            $ServerConfig | Add-Member -MemberType NoteProperty -Name $Attribute.Name -Value $Attribute.Value -Force
-         }
-         foreach ($Node in ($_ | Get-NavServerConfiguration -AsXml).configuration.appSettings.add)
-         {
-            $ServerConfig | Add-Member -MemberType NoteProperty -Name $Node.key -Value $Node.value -Force
-         }
+             $ServerConfig = New-Object PSObject
+             foreach ($Attribute in $_.Attributes)
+             {
+                $ServerConfig | Add-Member -MemberType NoteProperty -Name $Attribute.Name -Value $Attribute.Value -Force
+             }
+             foreach ($Node in ($_ | Get-NavServerConfiguration -AsXml).configuration.appSettings.add)
+             {
+                $ServerConfig | Add-Member -MemberType NoteProperty -Name $Node.key -Value $Node.value -Force
+             }
             $ServerConfigs += $ServerConfig
          }
      }
