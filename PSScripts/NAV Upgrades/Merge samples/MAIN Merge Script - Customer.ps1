@@ -13,7 +13,7 @@ $MergeServerInstance       = 'Cmfrt2015_App'
 
 #enable/disable required functions:
 $SplitFiles                   = $false  #This may take a while (depending on the amount of objects)
-$CreateDeltas                 = $false
+$CreateDeltas                 = $true
 $RemoveLanguages              = $true
 $MergeVersions                = $true
 $updateVersionList            = $false
