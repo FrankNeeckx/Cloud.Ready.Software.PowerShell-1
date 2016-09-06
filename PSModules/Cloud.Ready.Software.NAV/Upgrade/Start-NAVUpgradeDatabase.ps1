@@ -5,8 +5,8 @@
         Upgrades a database the classic way: applies a fob-file on a converted database
     #>
     [CmdLetBinding()]
-    param(       
-        [String] $Name,   
+    param(
+        [String] $Name,
         [String] $DatabaseBackupFile,
         [String] $ResultObjectFile,
         [String] $WorkingFolder,
@@ -19,7 +19,7 @@
         [String] $IfResultDBExists='Overwrite',
         [Switch] $CreateBackup
     )
-    
+
     #Creating Workspace
     $LogFolder = join-path $workingfolder 'Log_NAVUpgradeDatabase'
     if(Test-Path $LogFolder){Remove-Item $LogFolder -Force -Recurse}
@@ -28,7 +28,7 @@
     $LogImportObjects  = Join-path $Logfolder '03_ImportObjects'
     $LogCompileObjects = Join-path $Logfolder '04_CompileObjects'
     $LogExportObjects  = Join-path $Logfolder '05_ExportObjects'
-    
+
     if (!$name) {
         $SandboxServerInstance = Get-SQLBackupDatabaseName -Backupfile $DatabaseBackupFile -ErrorAction Stop
     } else {
@@ -37,10 +37,10 @@
 
     #Create database in new version
     Write-Host 'Restore modified backup and create as instance' -ForegroundColor Green
-    
+
     $Exists = Get-NAVServerInstance $SandboxServerInstance
-    if ($Exists) {   
-        if ($IfResultDBExists -eq 'Overwrite') {    
+    if ($Exists) {
+        if ($IfResultDBExists -eq 'Overwrite') {
             Remove-NAVEnvironment -ServerInstance $SandboxServerInstance -ErrorAction Stop
             New-NAVEnvironment -ServerInstance $SandboxServerInstance -BackupFile $DatabaseBackupFile -EnablePortSharing -ErrorVariable $ErrorNewNAVEnvironment -ErrorAction SilentlyContinue
         } else {
@@ -49,27 +49,27 @@
     } else {
         New-NAVEnvironment -ServerInstance $SandboxServerInstance -BackupFile $DatabaseBackupFile -EnablePortSharing -ErrorVariable $ErrorNewNAVEnvironment -ErrorAction SilentlyContinue
     }
-    
+
     if ($ErrorNewNAVEnvironment) {
         if (!($ErrorNewNAVEnvironment -match 'failed to reach status ''Running''')){
             write-error $ErrorNewNAVEnvironment
             break
         }
     }
-    
+
     #Unlock objects
     write-host 'Unlock all objects' -ForegroundColor Green
     Unlock-NAVApplicationObjects -ServerInstance $SandboxServerInstance
-   
+
     #Make Admin user DB-Owner
     $CurrentUser = [environment]::UserDomainName + '\' + [Environment]::UserName
     Invoke-SQL -DatabaseName $SandboxServerInstance -SQLCommand "CREATE USER [$CurrentUser] FOR LOGIN [$CurrentUser]" -ErrorAction SilentlyContinue
     Invoke-SQL -DatabaseName $SandboxServerInstance -SQLCommand "ALTER ROLE [db_owner] ADD MEMBER [$CurrentUser]" -ErrorAction SilentlyContinue
 
     #Drop ReVision Triggers
-    Invoke-SQL -DatabaseName $SandboxServerInstance -SQLCommand 'DISABLE TRIGGER [dbo].[REVISION_UPDATE] ON [dbo].[Object]' -ErrorAction silentlyContinue
-    Invoke-SQL -DatabaseName $SandboxServerInstance -SQLCommand 'DISABLE TRIGGER [dbo].[REVISION_INSERT] ON [dbo].[Object]' -ErrorAction silentlyContinue
-    Invoke-SQL -DatabaseName $SandboxServerInstance -SQLCommand 'DISABLE TRIGGER [dbo].[REVISION_DELETE] ON [dbo].[Object]' -ErrorAction silentlyContinue
+    #Invoke-SQL -DatabaseName $SandboxServerInstance -SQLCommand 'DISABLE TRIGGER [dbo].[REVISION_UPDATE] ON [dbo].[Object]' -ErrorAction silentlyContinue
+    #Invoke-SQL -DatabaseName $SandboxServerInstance -SQLCommand 'DISABLE TRIGGER [dbo].[REVISION_INSERT] ON [dbo].[Object]' -ErrorAction silentlyContinue
+    #Invoke-SQL -DatabaseName $SandboxServerInstance -SQLCommand 'DISABLE TRIGGER [dbo].[REVISION_DELETE] ON [dbo].[Object]' -ErrorAction silentlyContinue
 
     #Convert DB
     Write-Host 'Converting Database' -ForegroundColor Green
@@ -82,17 +82,17 @@
         }
     }
     Invoke-SQL -DatabaseName $SandboxServerInstance -SQLCommand "ALTER DATABASE [$SandboxServerInstance] SET  MULTI_USER WITH NO_WAIT"
-    
+
     #Start NST
     Write-Host "Start NST $SandboxServerInstance" -ForegroundColor Green
     Set-NAVServerInstance -Start -ServerInstance $SandboxServerInstance
-    
+
     #Import NAV LIcense
     Write-Host "Import NAV license in $SandboxServerInstance" -ForegroundColor Green
     Get-NAVServerInstance -ServerInstance $SandboxServerInstance | Import-NAVServerLicense -LicenseFile $LicenseFile -Database NavDatabase -WarningAction SilentlyContinue
     Set-NAVServerInstance -Restart -ServerInstance $SandboxServerInstance
-    
-      
+
+
     #Delete All except tables
     Write-Host 'Deleting all objects except tables' -ForegroundColor Green
     Delete-NAVApplicationObject `
@@ -102,7 +102,7 @@
         -NavServerName ([net.dns]::GetHostName()) `
         -NavServerInstance $SandboxServerInstance `
         -filter 'Type=<>Table' `
-        -Confirm:$false    
+        -Confirm:$false
 
     #Import Upgrade Toolkit
     if ($UpgradeToolkit){
@@ -114,9 +114,9 @@
             -LogPath $LogImportObjects `
             -NavServerName ([net.dns]::GetHostName()) `
             -NavServerInstance $SandboxServerInstance `
-            -confirm:$false 
+            -confirm:$false
     }
-    
+
     #Delete tables
     Write-Host 'Deleting Tables if necessary' -ForegroundColor Green
     $DeletedObjects | where ObjectType -eq 'Table' | foreach {
@@ -130,8 +130,8 @@
             -filter "Type=$($_.ObjectType);Id=$($_.Id)" `
             -Confirm:$false
     }
-    
-    
+
+
     #Import Fob
     Write-Host "Import $ResultObjectFile" -ForegroundColor Green
     $ResultObjectFile = get-item $ResultObjectFile -ErrorAction Stop
@@ -143,8 +143,8 @@
         -ImportAction Overwrite `
         -NavServerName ([net.dns]::GetHostName()) `
         -NavServerInstance $SandboxServerInstance `
-        -confirm:$false 
-    
+        -confirm:$false
+
     #Sync
     Write-Host 'Performing Sync-NAVTenant' -ForegroundColor Green
     Sync-NAVTenant `
@@ -158,30 +158,30 @@
     if ($UpgradeToolkit){
         Write-Host 'Starting Data Upgrade' -ForegroundColor Green
         Start-NAVDataUpgrade -ServerInstance $SandboxServerInstance -SkipCompanyInitialization -ContinueOnError -Force
-    
+
         $Stop = $false
         while (!$Stop){
-            $NAVDataUpgradeStatus = Get-NAVDataUpgrade -ServerInstance $SandboxServerInstance 
+            $NAVDataUpgradeStatus = Get-NAVDataUpgrade -ServerInstance $SandboxServerInstance
             Write-Host "$($NAVDataUpgradeStatus.State) -- $($NAVDataUpgradeStatus.Progress)" -ForeGroundColor Gray
             if ($NAVDataUpgradeStatus.State -ne 'InProgress') {
                 $Stop = $true
             }
             Start-Sleep 2
         }
-    
+
         write-host "Data upgrade status: $($NAVDataUpgradeStatus.State)" -ForegroundColor Green
     }
 
     #Start RTC
     Start-NAVWindowsClient -ServerInstance $SandboxServerInstance -ServerName ([net.dns]::GetHostName())
-    
+
     #BackupDB
     if ($CreateBackup){
         $ResultDBBackupfile = Backup-NAVDatabase -ServerInstance $SandboxServerInstance
         $ResultDBBackupfile = get-item $ResultDBBackupfile
         $ResultDBBackupfile = move-item -Path $ResultDBBackupfile.FullName -Destination (join-path $WorkingFolder $ResultDBBackupfile.Name) -PassThru -Force
-    
-        Write-Host "Backup created on $($ResultDBBackupfile.Directory)" -ForegroundColor Green 
+
+        Write-Host "Backup created on $($ResultDBBackupfile.Directory)" -ForegroundColor Green
     }
 
     Get-NAVServerInstance -ServerInstance $SandboxServerInstance
