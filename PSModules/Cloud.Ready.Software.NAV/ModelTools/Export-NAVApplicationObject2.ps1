@@ -16,8 +16,9 @@ function Export-NAVApplicationObject2 {
         [Parameter(Mandatory=$false)]
         [String] $LogPath,
         [Parameter(Mandatory=$false)]
-        [String] $Filter
-
+        [String] $Filter,
+        [Parameter(Mandatory=$false)]
+        [Switch] $ExportTxtSkipUnlicensed = $false
     )
     
     process{
@@ -29,7 +30,8 @@ function Export-NAVApplicationObject2 {
         }
 
         Export-NAVApplicationObject `
-            -DatabaseName $ServerInstanceObject.DatabaseName `            -DatabaseServer $DatabaseServer `            -Path $Path `            -LogPath $LogPath `            -Filter $Filter   
+            -DatabaseName $ServerInstanceObject.DatabaseName `            -DatabaseServer $DatabaseServer `            -Path $Path `            -LogPath $LogPath `            -Filter $Filter `
+            -ExportTxtSkipUnlicensed:$ExportTxtSkipUnlicensed
         
     }
 }
