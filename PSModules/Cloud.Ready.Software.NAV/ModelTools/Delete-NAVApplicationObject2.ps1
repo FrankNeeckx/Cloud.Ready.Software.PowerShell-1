@@ -19,14 +19,27 @@ function Delete-NAVApplicationObject2 {
         [ValidateSet('Force','No','Yes')]
         [String] $SynchronizeSchemaChanges = 'Yes',
         [Parameter(Mandatory=$false)]
-        [Switch] $Confirm = $true `        
+        [Switch] $Confirm = $true `
+        
     )
     
     process{
         $ServerInstanceObject = Get-NAVServerInstanceDetails -ServerInstance $ServerInstance
 
+        $databaseServer = $ServerInstanceObject.DatabaseServer
+        if($ServerInstanceObject.DatabaseInstance -ne ''){
+            $databaseServer += "\" + $ServerInstanceObject.DatabaseInstance
+        }
+
         Delete-NAVApplicationObject `
-            -DatabaseName $ServerInstanceObject.DatabaseName `            -DatabaseServer $ServerInstanceObject.DatabaseServer `            -LogPath $LogPath `            -SynchronizeSchemaChanges $SynchronizeSchemaChanges `            -NavServerInstance $ServerInstanceObject.ServerInstance `            -NavServerName ([net.dns]::GetHostName()) `            -NavServerManagementPort $ServerInstanceObject.ManagementServicesPort `            -Filter $Filter `
+            -DatabaseName $ServerInstanceObject.DatabaseName `
+            -DatabaseServer $databaseServer `
+            -LogPath $LogPath `
+            -SynchronizeSchemaChanges $SynchronizeSchemaChanges `
+            -NavServerInstance $ServerInstanceObject.ServerInstance `
+            -NavServerName ([net.dns]::GetHostName()) `
+            -NavServerManagementPort $ServerInstanceObject.ManagementServicesPort `
+            -Filter $Filter `
             -Confirm:$Confirm
 
     }
