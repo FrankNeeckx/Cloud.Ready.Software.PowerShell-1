@@ -56,7 +56,7 @@ $loadNav2016CmdLetsCodeBlock =
  Import-Module "${env:ProgramFiles(x86)}\Microsoft Dynamics NAV\90\RoleTailored Client\Microsoft.Dynamics.Nav.Apps.Tools.psd1" -WarningAction SilentlyContinue | Out-Null
 
  Clear-Host
- Write-Host ''get-Command -Module ''Microsoft.Dynamics.Nav.*'' -ForeGroundColor Yellow
+ Write-Host ''get-Command -Module ''Microsoft.Dynamics.Nav.*'''' -ForeGroundColor Yellow
  get-Command -Module ''Microsoft.Dynamics.Nav.*''
 }
 $psISE.CurrentPowerShellTab.AddOnsMenu.Submenus.Add(''Load NAV 2016 CmdLets'',$loadNav2016CmdLetsCodeBlock,$null)
